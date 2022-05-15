@@ -1,0 +1,1 @@
+helm install minio -n spinnaker -f Values.yaml bitnami/minio

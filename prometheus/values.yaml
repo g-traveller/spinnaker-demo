@@ -1,0 +1,16 @@
+prometheusOperator:
+  enabled: true
+  admissionWebhooks:
+    patch:
+      enabled: true
+      image:
+        repository: njiang/kube-webhook-certgen
+        tag: v1.1.1
+kubeStateMetrics:
+  enabled: true
+  kube-state-metrics:
+    image:
+      repository: njiang/kube-state-metrics
+      tag: v2.4.1
+nodeExporter:
+  enabled: false

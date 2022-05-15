@@ -1,0 +1,33 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: airline
+  name: airline
+spec:
+  ports:
+    - port: 8080
+  selector:
+    app: airline
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: airline
+  name: airline-deployment
+spec:
+  selector:
+    matchLabels:
+      app: airline
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: airline
+    spec:
+      containers:
+      - name: airline
+        image: njiang/airline-api:canarydemo-1.0.0
+        ports:
+        - containerPort: 8080

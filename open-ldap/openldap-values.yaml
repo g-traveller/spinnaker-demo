@@ -1,0 +1,19 @@
+# charts/values.yaml at master · helm/charts
+# https://github.com/helm/charts/blob/master/stable/openldap/values.yaml
+
+env:
+  LDAP_LOG_LEVEL: "256"
+  LDAP_ORGANISATION: "pdcn"
+  LDAP_DOMAIN: "pdcn.com"
+  LDAP_BASE_DN: ""
+  LDAP_ADMIN_PASSWORD: "ldap-password"
+  LDAP_CONFIG_PASSWORD: "ldap-password"
+
+## Persist data to a persistent volume
+persistence:
+  enabled: true
+  size: 4Gi
+
+## test container details
+test:
+  enabled: true

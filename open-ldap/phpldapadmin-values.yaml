@@ -1,0 +1,6 @@
+env:
+  PHPLDAPADMIN_LDAP_HOSTS: openldap
+
+service:
+  type: LoadBalancer
+  port: 8083

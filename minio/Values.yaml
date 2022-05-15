@@ -1,0 +1,11 @@
+image:
+  debug: true
+
+persistence:
+  size: 50Gi
+
+mode: standalone
+
+auth:
+  rootUser: "minio-admin"
+  rootPassword: "minio-password"

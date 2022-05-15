@@ -1,0 +1,278 @@
+apiVersion: spinnaker.io/v1alpha2
+kind: SpinnakerService
+metadata:
+  name: spinnaker
+spec:
+  spinnakerConfig:
+    config:
+      version: 1.17.1
+      canary:
+        enabled: true
+        reduxLoggerEnabled: true
+        defaultJudge: NetflixACAJudge-v1.0
+        stagesEnabled: true
+        defaultMetricsStore: prometheus
+        templatesEnabled: true
+        showAllConfigsEnabled: true
+        serviceIntegrations:
+        - name: prometheus
+          enabled: true
+          accounts:
+          - name: prometheus-account
+            endpoint:
+              baseUrl: http://prometheus-kube-prometheus-prometheus:9090
+            supportedTypes:
+            - METRICS_STORE
+        - name: aws
+          enabled: true
+          accounts:
+          - name:  canary-aws-account
+            bucket: spinnaker-cn-canary
+            rootFolder: kayenta
+            endpoint: http://minio:9000
+            accessKeyId: tddAN7M3HhgPeiUS
+            secretAccessKey: OHnuM7xDBoNwPjgTcXVQ5WjGDspHZBvI
+            supportedTypes:
+            - CONFIGURATION_STORE
+            - OBJECT_STORE
+          s3Enabled: true
+      persistentStorage:
+        persistentStoreType: s3
+        s3:
+          bucket: spinnaker-cn
+          rootFolder: front50
+          accessKeyId: tddAN7M3HhgPeiUS
+          secretAccessKey: OHnuM7xDBoNwPjgTcXVQ5WjGDspHZBvI
+          endpoint: http://minio:9000
+      security:
+        authn:
+          ldap:
+            enabled: true
+            url: ldap://openldap:389
+            userSearchBase: 'ou=spinnaker,dc=pdcn,dc=com'
+            userSearchFilter: 'cn={0}'
+            managerDn: 'cn=admin,dc=pdcn,dc=com'
+            managerPassword: 'vGUhvwGBFiYuvPT3sLnyUDuLXXvU5FK0'
+      providers:
+        kubernetes:
+          enabled: true
+          accounts:
+          - name: aks-dev-account
+            requiredGroupMembership: []
+            providerVersion: V2
+            permissions: {}
+            dockerRegistries: []
+            configureImagePullSecrets: true
+            cacheThreads: 1
+            namespaces: []
+            omitNamespaces: []
+            kinds: []
+            omitKinds: []
+            customResources: []
+            cachingPolicies: []
+            oAuthScopes: []
+            onlySpinnakerManaged: true
+            kubeconfigFile: kubeconfig-aks-dev-account
+          - name: aks-staging-account
+            requiredGroupMembership: []
+            providerVersion: V2
+            permissions: {}
+            dockerRegistries: []
+            configureImagePullSecrets: true
+            cacheThreads: 1
+            namespaces: []
+            omitNamespaces: []
+            kinds: []
+            omitKinds: []
+            customResources: []
+            cachingPolicies: []
+            oAuthScopes: []
+            onlySpinnakerManaged: true
+            kubeconfigFile: kubeconfig-aks-staging-account
+          - name: spinnaker-demo-account
+            requiredGroupMembership: []
+            providerVersion: V2
+            permissions: {}
+            dockerRegistries: []
+            configureImagePullSecrets: true
+            cacheThreads: 1
+            namespaces: []
+            omitNamespaces: ['spinnaker']
+            kinds: []
+            omitKinds: []
+            customResources: []
+            cachingPolicies: []
+            oAuthScopes: []
+            onlySpinnakerManaged: true
+            kubeconfigFile: kubeconfig-spinnaker-demo-account
+          primaryAccount: spinnaker-demo-account
+    files:
+      kubeconfig-aks-dev-account: |
+        apiVersion: v1
+        clusters:
+        - cluster:
+            certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUU2RENDQXRDZ0F3SUJBZ0lRQWdXMXlnZnpNRlFIRFBFalNGdXZoREFOQmdrcWhraUc5dzBCQVFzRkFEQU4KTVFzd0NRWURWUVFERXdKallUQWdGdzB5TWpBeE1UQXdOVFE1TURWYUdBOHlNRFV5TURFeE1EQTFOVGt3TlZvdwpEVEVMTUFrR0ExVUVBeE1DWTJFd2dnSWlNQTBHQ1NxR1NJYjNEUUVCQVFVQUE0SUNEd0F3Z2dJS0FvSUNBUURKCk80MStrWDVKaStrZlVuUnBvNXZXUU1LN09IQ3ZkSWVhVXRybUV4c0VWZ3d6WjNnZ3Rrcndqc3ZPRS8yQVovMFYKd1crRzR2U09ZejUwK0xNSkVJWE1oYzBCUFY3NkJYZE9xeXJ3bDVveEtnVXU1QXZOSDMzRXFncHVxKytoTGNLKwprMDUwQmNZRVo3VFVzQ3loY1N3U1U3Q0ZxU1I5QmFkOVNWSlRiRWpEQTV6OGtXd1dSenE3M01QeERHSThkc3NECkJwelp3Q2p0RFhnMFdKWkg4YlYwcGxZMS9MZ3ZXTmR2TzNjdUw2a2VqMTl4MXdHSXoxcksyRXVWcUpQWnNWbGUKWHp1czNCUEZzQ0FmRWNJVFNUb2VlR1VEZDFXQXRvL2JrQ016aE1kRTJLd3djaDJ2YkhhaUJHTm44NTdqd25MawpXeDhVTFNaTHJQM2JFUkNxMlZQUEg4d0UrNjJxOVcxQkh6NFZsUEVSZVhUQUczQ2xDTHZrWUpydjB2ZVBMdkVKCitSN2F1OVo5UFpGbitGbWdNd0REMWdpTHFGZDZXYkJMNEovSVRMbHNiZTFoWXFGekE4WkxFVW9oTmhWTnhUSXAKR00zQWFmKythd0pOcWRmRUtwdTIydHhyaTdSSlJYODl0SUI1WnlaS3NEalNmNnhoa09wc1pKUDEvV3RmZ3RSNApZeDArODUzNXlJNkNrd1pOYko0d1EzT0JlVzg0aVlyWE9OYjZwTVdDVktWSk4vQmo0WEhsSitlTjFuMzBnRUVjClVnRURaTHdlb2x6OUQ4b2h0b1pLV1I5ZWFCaEI3NC9aRjRublpBakFqQm1KMzBoRWM2U0V3U2N3N0hRa1ZseXAKaFM0d0hXZEEwNTUzNzFrT3JDUmI4QzFUWlBWR3VoSEpwTDN3ejl6VEh3SURBUUFCbzBJd1FEQU9CZ05WSFE4QgpBZjhFQkFNQ0FxUXdEd1lEVlIwVEFRSC9CQVV3QXdFQi96QWRCZ05WSFE0RUZnUVV1NVorMlNBQlA1RzgvZDFhCkZuQ1hieEVXVStjd0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dJQkFIdVRPZm1rQXRIdlo1am12L0FHbElsU3MzRXcKWVdNSkQ4YjR2L1J4RFovWjBsNktpWld0R3lkQ2c3YWM0a3I4Yk55VFVockVqTDEzd2ZoK1kyemo2dlI0ckRMcQpISms2ZWs2OEVRbkFmS3NFOGFjQS9rcGdJajMrY05YdzVNbGJaMVJQT2s4UHI3dkM3ajVDV0tPUEhlSVFobnkrCkZmMHk3R1VpMnpDTG9wQWhNWEtrZVNwWDVzVHJ1VklVZzgxSW9MK2ZBK2EzNmZCYWFFZWRHZERzN2pZR3hONXAKVjVCT0k1c0piRUdwK291TEZneWlQNXV2YVN5TUdKUGpzdU8xbjVIUTlreUJsdkVkUXZxNERxUlVDcXc4UXk1TwpDcHdIZXJwTGpxRUhBb0lEb2pHSkwzM2k0VnFFUEpNRWR4VERwTXBjRXF3OXNXMWFqc25tREliTFc4N3krakZ3CjZRbFNHZU9pa3pkd0J0WHVIRzdYemc0Ni9CVGRtR0RNdUVUVmtXOHR6aStXcjNSN3liYUZMSjgxanRjNndpVFkKTHFoeTA3azdkZEJzSDU5ZTBtRitJK2s0QUxPZlowci9KaXpwTWltdDBvd09ocS9MeFNrSUQ2NnhyTjlFNElvZQovVjJ0SDdlVzBPNWJsUm8wRkdKSGJ1UEpQUUNFcW16ZWw2VlAzR1ZzdUJxeHd3TTZuQkJoN3JtRjdvbHArM29CCjZJNHhXQ1dORzNObGd3SmR1SkkzNEU2UnJ6enMyMkhreDQ2NnFPeEpkdGVER3hyNWtsbDBKTC8vcTI0UGJXZWEKeFJoZWgya21FVDh1bnNiRDNpV2cwVXRGRnZQTW9xY3lndVEzNWQ3ZXExRnhHdHRGd2J0YWlZWXNoZU9wdmwwMgpSMzNSRXpCcDZnSGlsVys1Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+            server: https://gravity-dev-dns-ddc6d6a1.hcp.chinanorth2.cx.prod.service.azk8s.cn:443
+          name: aks-gravity-dev
+        contexts:
+        - context:
+            cluster: aks-gravity-dev
+            user: aks-gravity-dev-user
+          name: aks-gravity-dev
+        current-context: aks-gravity-dev
+        kind: Config
+        preferences: {}
+        users:
+        - name: aks-gravity-dev-user
+          user:
+            client-certificate-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZIakNDQXdhZ0F3SUJBZ0lSQUpMZ0ZBVVFKWTdnWHgrOUtiSWtQdTh3RFFZSktvWklodmNOQVFFTEJRQXcKRFRFTE1Ba0dBMVVFQXhNQ1kyRXdIaGNOTWpJd01URXdNRFUwT1RBMVdoY05NalF3TVRFd01EVTFPVEExV2pBdwpNUmN3RlFZRFZRUUtFdzV6ZVhOMFpXMDZiV0Z6ZEdWeWN6RVZNQk1HQTFVRUF4TU1iV0Z6ZEdWeVkyeHBaVzUwCk1JSUNJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBZzhBTUlJQ0NnS0NBZ0VBM0hjUXl5d1JEOTBHV3l3U1BGRmMKbUNZZ3ZBdU5yWHEwT29FYVNHWmwvK1pPYTZNUWZlSmFDdmJmWFhkdkhtLzQ0dkFMcXNzUnF1MFV2dkw4THpEWAp3dmxvR01UUkhHUVBkbHBaRDRwaHQ4MWpEbnEzc0lMSDNIbmlzait0d3Z2YUlkb293TFFZWUtRMW1uem9LdEFFCmJUUXEzcEdwS0RqTldzSUdPcEhvbEoveVpMQ1NVVmNTcEJkd3NMM2lFK0tGcjVBTUZzaTQ0QU1nUm16ZVVnR2QKMmViTDdwUjZWOSthN2Y3dTVBemY4T0h0Rk9jbG9JcThsdDhyZmIrVkNXR0hUWDV0dVArckMrK3BpR0hpU21sSApHMHlZT002ajdyam5BQUozK09HWDFwMTZyM1hnR2ZPdzRMSnlDQ1hDSUVaeHpCSG1odXpVcmxCYlRNL3JnV1o3CjZrK2dGcitUZmN3RVVuazJJZm0zSFAzMHNHbGpjMDFLUm1xZ2NLMFVZMGhlVmhFbVhINkxSMEhWb0E1ZDdXVkEKdlpQOThBSlJiVVg3Y2xiU1BGY3pIbWdEZXJmdW9kYVY5YjdxSncxdHVTZGsvbGNPV3hZSW5RQTBFQnhBM09mQwpoQmZOOVdyRjlHekpuVHBIVDVtSmM1dFcrNW5BN0M0b1N4SHZGVDhPYU5raCs1Z1Q4TUI3NzFkRTEwWTZYa0tUClFnV1RlWDJrOTduczhZYUlxUEtrVEdyS0w1RnlmM0w5ZWl0OXZPVktXVVljVGpMQ2QwcU92VDNNRHFpY0k1YTcKOCtQcHErVCtzWUd0Vjljcy94c0pCcEFUcUxpbmRtWmhSb1hEVUljeCthWWdrWFRVVXQ5bTNMTklwOHZBR0FiYwpNejNqczNud2tTZzRTMFJSaTdYSEF6Y0NBd0VBQWFOV01GUXdEZ1lEVlIwUEFRSC9CQVFEQWdXZ01CTUdBMVVkCkpRUU1NQW9HQ0NzR0FRVUZCd01DTUF3R0ExVWRFd0VCL3dRQ01BQXdId1lEVlIwakJCZ3dGb0FVdTVaKzJTQUIKUDVHOC9kMWFGbkNYYnhFV1UrY3dEUVlKS29aSWh2Y05BUUVMQlFBRGdnSUJBQUZ0THJlTmE2YWxaMHNZWmdNZwpGODNPSTc4YUJnRzQ2dE1aek43UUhPT1ZXYWxQYzA5WUdUcUNucWh5Q3JWa01BKzl4VzB5aGRhTUdUc01UbTNJCnZzOEtQRTFNcFVHS2YwRXdDR2VJV0tEWlRYOWJkQjVPcTlhV29Ub25SaTQ5ejlyN2MzcEVPMHdFVjVwMkF5S3gKdWdoRVB1NkZ1YWtXN3Zvcm5ibnFrWmlCb2QwdXhod3lkSmNNRzJDOHRyczhIMGZ6ZGlnMXhGZUlkQjhWeS9jcgo5SUlEQSt0MTBPWEdHUTMrMVpIMDYwSU9KVUI2Mnl2YXc0OWxpMjd3L1cyWnNEeXA5RHZON3NPV1Qva0lTdkIzCk1qQVRLZ1RJSkl2ZTNwdm1CNXlJVHdBMWtDTlZHMG1haTl3Lzd2OWUwYlprRzI4Qno4UWs2SVBiSXVpVVV0ekkKZ1JSczNWako2SUNEVXVvYm9EL3NIM0xiNnpwcjZscDRiempEMVB0UWhIVDZ1YjNnUzZBTXdQOXpHMVQ2WTczWgo5OElvYVpFcUJnMWNjNVE3MCs1WitWWklIMXNkaWZ6UTBUK0tvTnZlNlI3bU5hbWduTnkya01taUxMQ3R6em44CnBmaVFEbjBMNk1TOGRrTFk0ZmN1WStmQmpObE1HcXFFRWduRCtnUkRzWUtuM3plc0VleU1OeVNkMUNGUEtJSVAKclg0b2NwaVNWbGViVWZlcWordURMVkUvdnRveWY2L2k4SVNUQTkyMVorWkFRcWZzSFcrYWR4NU5HQy9nNGMzNgphNCs4YUNzTnppL2lBOThadGg1UW1zdVRtR0x3azlaanZpVGQyRTVEUXhxMU94N2RtbGN0bXdWU0piRThiTWNECnBIeXRFdnJhay9ZZ0lTVGVudFYzaEUvKwotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+            client-key-data: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlKSndJQkFBS0NBZ0VBM0hjUXl5d1JEOTBHV3l3U1BGRmNtQ1lndkF1TnJYcTBPb0VhU0dabC8rWk9hNk1RCmZlSmFDdmJmWFhkdkhtLzQ0dkFMcXNzUnF1MFV2dkw4THpEWHd2bG9HTVRSSEdRUGRscFpENHBodDgxakRucTMKc0lMSDNIbmlzait0d3Z2YUlkb293TFFZWUtRMW1uem9LdEFFYlRRcTNwR3BLRGpOV3NJR09wSG9sSi95WkxDUwpVVmNTcEJkd3NMM2lFK0tGcjVBTUZzaTQ0QU1nUm16ZVVnR2QyZWJMN3BSNlY5K2E3Zjd1NUF6ZjhPSHRGT2NsCm9JcThsdDhyZmIrVkNXR0hUWDV0dVArckMrK3BpR0hpU21sSEcweVlPTTZqN3JqbkFBSjMrT0dYMXAxNnIzWGcKR2ZPdzRMSnlDQ1hDSUVaeHpCSG1odXpVcmxCYlRNL3JnV1o3NmsrZ0ZyK1RmY3dFVW5rMklmbTNIUDMwc0dsagpjMDFLUm1xZ2NLMFVZMGhlVmhFbVhINkxSMEhWb0E1ZDdXVkF2WlA5OEFKUmJVWDdjbGJTUEZjekhtZ0RlcmZ1Cm9kYVY5YjdxSncxdHVTZGsvbGNPV3hZSW5RQTBFQnhBM09mQ2hCZk45V3JGOUd6Sm5UcEhUNW1KYzV0Vys1bkEKN0M0b1N4SHZGVDhPYU5raCs1Z1Q4TUI3NzFkRTEwWTZYa0tUUWdXVGVYMms5N25zOFlhSXFQS2tUR3JLTDVGeQpmM0w5ZWl0OXZPVktXVVljVGpMQ2QwcU92VDNNRHFpY0k1YTc4K1BwcStUK3NZR3RWOWNzL3hzSkJwQVRxTGluCmRtWmhSb1hEVUljeCthWWdrWFRVVXQ5bTNMTklwOHZBR0FiY016M2pzM253a1NnNFMwUlJpN1hIQXpjQ0F3RUEKQVFLQ0FnQkFUVzRWaEYzWm5hTGI5c2UrMWhCR3hHQXAyTWpTLzRZUHhsWVBKZWE4TThWTnVicjJySTJNd3lLMQpGVC9ReGVIMjl3TEFKd2laTFJzdThwcEJmV0tCR05PVzNka01DZGRFc3VkbEUveWFhb3Bvejd4Qi9ITWt5RndwCmwwOHNIdDhwbm9MaWFlVHVVeGJiWDNFc0E0NDI5ODlGS1lFSUhVRXdKb1ZBa2d3ZlJXT2lvS21jbGVQMi9tczgKOGJVK0RZVG1od0l2cHczZE1LdzZQa2k5N0lESTdIc3d0QmZYQjM0ZHlveU04WUJqdHRHNmxneXdmYWF4N3BlMQp6cW8rbVRhb2tLYWFIZUFhMUNWRGhTRkdpTnhYaHdpakVRcFpkNDdRdnVlVkxOOW5sbmtSTWpWUi9IVHJwTUNECnhkZVFLRnZLcExIelNxSmgwVWcvNkNrTmpnRzM5QlNYYmpWOFlpa3FnVEFlcEQ3YmplNlNjNXZWbDJXQzBuOXQKM2xJQTFuYTBHS3lXVSswSVlnU2k0TzYvaC8zQmhYVHVjcWRXZkpYN0FhWFNxeDI5Vmg5ek40QW1Eb3EwRVlrKwpoMDRRK1ZWeURNc3VIZU5mck8wT3FqVHBjMXBlM0Ixa296bmZsNXB6WGtpNVF2akVaZmJ1YWhoN1lDQnZDdk5vClNKRFZEQWp6WGduSDdLVTd2RzEwU1EyYTZEcVd3MmJwT2F2NHFVR2dSVnJ4ZzZjU1VYczBvSDVqSVdpYkNHR0YKNEhLNytvVnhWKzVBa1ZITDlBcWttRmR1SFBGOVc0bER0WFdwMXJxRCtUQUJlaTk4eWpoWlRKM05YV3I3S1ZvMwpBdWM4THJ4TXlnQmFWdk1OVmR1YUFrRm1KYzQ1QysxQjhpYVZrdnYvWk5lL0YyZUlZUUtDQVFFQTR1dHhCUmcvClAvWFFDbVN0MmdralJNK0wrb3ZISENsNldSNkJ4YXJyVjRVZVJGYkZzcktNOUhPS1lJUnFSVmtsYUlNVXR0TTUKVmR1RVdtNmI2a0FzR0lsQ1pyYnhEYVZiWjNsU0RaRUtTQ09CTFQ4S0cxV29CMkZ1MDBSSmdNWFEvYW50L01UbAp4eUZBMm9Ud2g1NXlLVjQ1dDlWM2pUMDE2OHI1d3hkZEdEL0Q0SlNyZzZlOHNwY1dlcnEwSUlyT1NFY016aUdxCjNodURDankvTXl4WWdhMGlnc3dMWUQ4bXYvRDBwK21xVFFEWXhpSkhseG5wY2JYMWVuZkpEZldMLzVNcm9PejMKemJhdFBia1FJS2dwL2ErdjhraC9pd2VCUWQ4MTVVbXJubXlaVnNOZmJOS3RkRHlOakhkMG5QSU90d2wwOHN2YwppRUwwWTVlYUg5NmM1d0tDQVFFQStMZmVQM3dVZ3l1RnZISmxJZXhBL1BvZXZScnFFQTl6WlUxRXZab1lVeHBhCktST3d4V1pnbkhkaFhkamM5MEVUdWpMejhXQjdsdXh3d2FiQ2VHODE2eE5tZUFteFhXMVZhQkg0b1Qrak1EalYKQjNSbEh2SkJuU3JRQWlpZzg3dUtxY3pPWWRtbEtSREZKZXBRY3djTGV0aTdBd0E4RURvWXlXQ3hSSWdLSmVycQozcnhORitkQUczN2JJYVE2R3hvMStRaXordWtsakZzV1dWTlZsenF4LzRNbnFMU1RBMDRvSHpmS0JYZjdIcitQCmNQR05vUk9wQW92UG5XRjhJYUZmQnBNU2xZRTZkOEpLdGxQZ1JUZUJhWU90dGE2dzJjUUZGd2k2WFZ4V1hGYUMKS2lHTm9mOHpnWjl6TUlVRk1NYlhlaHl2ejRYK1J0S2lUcWF2bklyTk1RS0NBUUIzQnBoWjI4WVJmcGFKWFJYego4Q2NYeU9YYm5jWHE5N2E5V0VzcHErV1dHclV0azNaUHJXaFNNT2k4aDdoV2Q5UXZaZEpQczZ1M1pWV2ZPYlYrCndmcGZSR0FZRUkyUVl0UDNDcVFIaWJTaThqeW54eEUrRlVmMTF4MlNvNWNLZkxpSzFiK0hmcUFvTzBFUlhmbnMKcVNlb20wd2JLVlYwT0U4NFIxZUxCWTVIVWVza3VkYmRUL2FpbHEycjRwTHBIdVhrODUrNzM5MEljOVhnWU16Sgp3dEVKOUE3T0hNazZ5dVZBZU50YjJDMEVCeFd0bC8yRlBJbytvdnNJS2h6RHZiQ1pkbERFTUlncTEwODN1UUxFCm5uQ29LS2RacHIxLzU0ZmRUWCt2clZ6ZjFJYjZBN0RpRy8vdm9ITis0b25BYVJkZTJ3OEU2L25aWDRWaFYvdjQKQzRTeEFvSUJBR3NaMmpWaU8vOEQ5ZEhoUE5Wdnc4aHIrR0tjUFdCdkZ0VHZnZ05YWU5RZ1MrVFdXcytXTjFJSgpRajlFVEZxWWhtTXUzOGI0TWlBYWJxK2xIS2I1MUxFR3FLQldKQzlFRG53RENScCtxY254SHlMWHAxZTlJQzRLCnFvblRid09scFo5YTF5Qmh0WEpLaTJxNVRLMUx3bERERlR6RWxCaTB1OG16dm9IeFJ0VnZKSGFIaFhjZW1JZCsKaCtRanNQWE13cU1iY1UxQnFtNlhKcmVPWUJRQUxYZ0d4VVFyaGdidFYrK2hlWGdEWTNxcEtKNk5GZHpmOTI1bQpRQi9ZUTdqRG9ZVFdQakZzOVgxdWgvZWRoTHlwbXl1UmpYTG41N1hPYUJhMEpuUmZkN3pKYjhHdXN5dW9Ga2ppCkhac3VITDhWVU9KL2llR0dKS25ndUEzQVQyek1oSEVDZ2dFQVV4UWdtN1JFZ3J6WktwTU5xR2txZXpySVlpYzkKYjE5b1pVdXNMWHpDOUFLcjRuaGhQbHZuQmJUOVhoR3J5dEFqT1lTZzV3cHNkaDdpUE5kZThzY0NRQjBnSWV4SAphZ1ZVeGk0V0Jzc3V1WVloc2MyUERBcTJqSFYyUk1BVk1VY3g4ZUl4a0lwVkxXK3BWYzhRMHRTclg5cWVGR29LClpGc2hJM3IyUlRMcjBQUlh2VWZuRWJiYUcrejFmYzB4TlkxRTZqMWlBdjBUeStTbjRob1RySWRSZWN5UGVnU1kKTWtkNmxLWkQ4c3pUNExSNFN4SFBwZk01R3ZDZkVLcmdqcGtyVHRhclVoS1RYS0V0RDNBTE1PejRkN0ZyUG52dgp3OHgrSWx0Vkg2RDIzd09CK3NsQmZ3VHBHT0FnaHEvanJBOTg4UlAxb3NoQ1BnRkllN1pYSnZTMEpnPT0KLS0tLS1FTkQgUlNBIFBSSVZBVEUgS0VZLS0tLS0K
+            token: 6a98d0b668fe674dcd870d60c0d1d92d320f918753712ed8cb048fed7ba376fd6645eb13cb1cd4bc9081b1f4d3dcdc77712927a2a6a85cbfc4ad088e56dda1d8
+
+      kubeconfig-aks-staging-account: |
+        apiVersion: v1
+        clusters:
+        - cluster:
+            certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUU2RENDQXRDZ0F3SUJBZ0lRUVd5czNSK0gzTjVOUEQ2SlFFODd4REFOQmdrcWhraUc5dzBCQVFzRkFEQU4KTVFzd0NRWURWUVFERXdKallUQWdGdzB5TWpBek1UZ3dOekV3TWpWYUdBOHlNRFV5TURNeE9EQTNNakF5TlZvdwpEVEVMTUFrR0ExVUVBeE1DWTJFd2dnSWlNQTBHQ1NxR1NJYjNEUUVCQVFVQUE0SUNEd0F3Z2dJS0FvSUNBUUNvCm1keStYMVZwdE53RWdEMlh0eFZjRUVUWUlIWDRiNnl5OEFJSlNzZDY5TXhib3hUMDRYUm03ZHFBYUJiYkZpVnMKemhoM3ltQ3kzbUVZQW1GbEVBOFdUdWZ2QzVJdnlZRURoRmNKei9sUkVkREVzWVdHSzIzMzhhTzJoaG9UYnhGaApVTGNmdnpSdjJqTjVteVhabVN1MG81KzMrc3RMSjhYMWE4c1Mrc2VUaGU5aVJvb01UWW1sbzlHTG54dm1zbDBUCkVHSlU4K1psUzV2dk44R0NLejMwa1J1RHM5L1cra0VNeGpOVWJnSGhPeExQclRiRFVXWThkSWVRRGdtVlN3c1IKYndXRmpCNWdRM3QvYlY3NWpiQ3pwUHducmRSdGE2V0tSSjdtN2Fma21oZ291OG1XWVowdGw3eDJqQndVcHNjWgpDeXhBYm8vN3JpTEZ1U0hoZGtEZy81NTE5SHB4NTZ6RVpQSHVqOU8zSU1GSzZtaG0yeTRYYTdCNzBHcDFvUjZqCm5XZlkzc3pZaGZBN3llSzBLR2FMaGRES3lnS3lpcHd1TVhmYzFzS2VYM3ZIUExLdUJJN3JtbWR0NGtUNWVQcTAKWUlTOEcrc2VZaWg0aDZVWmlWSStiREx5aWNWM2R1NXZTdlV2MC9vTXY2Rks0anhiTDN1azduc216WWdZc1RtQQoyNUp5a2VNQk4yWDdpaUxzUEFKTUNGTW1JZWFDMmhtUFhCRyt0TVpjM2hybUtEMnZyMWlUYkcyRTVPSjRKVFgxClFQUEx0ODA2bnM0NEI1UnFyR1hWTmdUMmYyS2YvYmJYSEZ4VWlXS3JJVEJXb01ON09OaThXOFVMTEwrcVVOTi8KVXNMN3pTSm0yck1MaDJHd2ZnRTZ0MTREZGI2WTQrN2NPRHRGV3NFRGN3SURBUUFCbzBJd1FEQU9CZ05WSFE4QgpBZjhFQkFNQ0FxUXdEd1lEVlIwVEFRSC9CQVV3QXdFQi96QWRCZ05WSFE0RUZnUVVrdWxSNWtMYmpKL3ZicUQ5CkFZaDZhY1JnbFgwd0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dJQkFJSHVyWEY2QWRuWDFHY2NKbUhjUVlzdUdBNkEKQWFMSGk5cTM0SXJqcjRLc2hKbGtXN1phZnlPSjFxOUZLbzExYytEYmdIZ1ZycHc2RjNsbCszdFpBRFA3Z1E2TApob0pJeXJRTkNNSmUrNytLTlRkV1VLdG0zZWRHVTdZaW9VL1M1bmlYd3VpTEhsS1hFbFRsa3ByN3ZhVlk0dnVmCmpzZ0VHVmpOcFZOY2E2UmVxUlltbUhpVTkveHBXeUpzUjJ4bDcrb0NRc0QzclB3ZlBIeUJYVmh2UDFKdVBLNGQKMk9tWDBXYU5aTG9hc25hZlBhSTVoOTl6TnJJTW4wS1lwdUN5eXR1V0lPM3gxd0tFRXRPQWJGT29OYzZ3ZldiWgpJQkd0bHJtSFBxajZuR2IxQWt3QWdaZU9hSmpRZ2cvRHNuRTVLZVd0MkxIRzRJU0RacFltcnRjTWxWUTFmNWkyCm56YU8waWdaSk1aemY3VjQwd3FMSldUcWNOcjBlYTRwajdVNGNxalIxUkNMckY0TzFIKzRyTE80dkZMQno4N1AKbStwOVBPNzdTbWRGRWczeWt6SjVhNmdNR1dIZHA2OXFmOEJ0WUFtUmlZVHAyNTV1VHkzdWw5YlR1TXRNaTFzbQovSEFlRzFLVTNwdTYrUEhtRHBlUk1wcld2RlBWSFdCRWF1MjZxLzZra0VOSmNoUE5TMjZNWjRud3UzV2s5cGdlCkZMK2UvdUw4SGdPMEh5cVlqNGgrQktmRkxaY3h2UnlkTFlDbU04a05YNkdRelVoWXM2bmllODlhQnZ4dWVmaXAKQTVNaVBiTlIwM3JjZG5TdGFNLzNublhJM2l4ZnltMjRZRlJ5L05NdExSSjY4SEtvQnozNGRMcnplRUc3MWdGVgorUjBEbitMbUhZWis5SlhSCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+            server: https://gravity-staging-dns-e1b6629f.hcp.chinanorth3.cx.prod.service.azk8s.cn:443
+          name: aks-gravity-staging
+        contexts:
+        - context:
+            cluster: aks-gravity-staging
+            user: aks-gravity-staging-user
+          name: aks-gravity-staging
+        current-context: aks-gravity-staging
+        kind: Config
+        preferences: {}
+        users:
+        - name: aks-gravity-staging-user
+          user:
+            client-certificate-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZIakNDQXdhZ0F3SUJBZ0lSQU9SbllUV2lORHBET0NuV01qc2t6NTB3RFFZSktvWklodmNOQVFFTEJRQXcKRFRFTE1Ba0dBMVVFQXhNQ1kyRXdIaGNOTWpJd016RTRNRGN4TURJMVdoY05NalF3TXpFNE1EY3lNREkxV2pBdwpNUmN3RlFZRFZRUUtFdzV6ZVhOMFpXMDZiV0Z6ZEdWeWN6RVZNQk1HQTFVRUF4TU1iV0Z6ZEdWeVkyeHBaVzUwCk1JSUNJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBZzhBTUlJQ0NnS0NBZ0VBMGhxRHV0bzVnYXNTRzdRV3Q2ZjMKbFd2WUtBSzhLSGJKMXRQWHFmcDFxUzRPeGlKMFRuUXkwTTlyNjBlQlp1UFJaaUlGRGUyc2ZmL1ovSklxd1FFVwo5RDBwS1ZkOHVaQXF6R2VYWDlJSzh6QmxqR3pjYWFlMCtDcWlXRUI0T2RCT1VaeGRFNFdRV2xEZlpxZSt2NG5aCkllZjdPbEZWRHQ1cndNdVVPbkxuekozNUZsVmlxN2ZoRCtCYS96bDlmdTA1UDQxNlVaR3NablhzNFJMd3doR0gKMDRKVHJRTGlXS290MTRMMStERXI3TmtiOWxSS21QUFZMMVZXVU41cVZnOFo0aURQZjlvdjVwMnJMaGUvUFd3cQo5Z25MNjlWOERnaEg1RlhHcDJpS0F4Q1UzS2tYOFMrMkFWcitUWmpQbXEzRUxYT3ZvWlhDSGI2LytCUDlkWnd5Ckl2MlVNMldjRXlZUmNHMXhKUG82THZKbkkwTlVIaFIzZFR6dUN3QWk1WnJteWJqK1l5RjcwZlBMR0JDZEM0azMKSEdibHNyNkhVLzhmRU45dUp4MzhyaSt3RS9UMjFPazcvakJvUmZadldqZGJPVzBwcFJnd05Mc29Xb2UyOWxZbwordXpQamtWMVFKblN4MVp2akJHc1ljbzhDNmtFdGxEMFZRbFdsYkQxUnM5aURKOEduNUJ6aTdvTmFjTnB1Z3ROCi9ubUVYb3hwcy9hZ0hGVGNSQ0VsWXA3U3ZUYjRhT3RieDI1TENxeTkrR2VYNlFJeGFnQUwzNHZ1aG9CTDRLK00KQytYT1gxWjYvb3pSUy9WTXgrMlplaTlobWdTcTdZZEpIRk9ZWnl5U21DaGFaY3JVT1EzOVIxNHpyMFl1N1VzQwplT0FQTG5YcitsSjBxTVVXSXQ3WnNTVUNBd0VBQWFOV01GUXdEZ1lEVlIwUEFRSC9CQVFEQWdXZ01CTUdBMVVkCkpRUU1NQW9HQ0NzR0FRVUZCd01DTUF3R0ExVWRFd0VCL3dRQ01BQXdId1lEVlIwakJCZ3dGb0FVa3VsUjVrTGIKakovdmJxRDlBWWg2YWNSZ2xYMHdEUVlKS29aSWh2Y05BUUVMQlFBRGdnSUJBRmJtTTdPa0xJYmRlamVrbUhlMAo5N1lyOHZkZXJrSXl6ZU1udy9xNkk0Y3U4VFBjdTRaUTMyUWVTc1cvcXpPUmFUSjhLa1IwL3NKR3B1U3pnUG9ZCmNCRnhaYlJyYWhReDNITlhXbCtWSGZyRHZINU0wanRYOFVkRVROMTFPZmtTYTFlbFZyUXFpZHlUTDNzSWZDU1oKdStqT0YxWk1ibHNreHFHd3pLcmQzM0J6bGQ2Zm02dFdSa2FEWEZpWVhMeXFQbFk3MDgvUHBvV25SdzdVZ3kvSgo2NDdJdUJpaU56UUd4Y3lKTTlFOU1Bd09Bb2lOYXNDMzhaWHFRRzdoSnEzNzJ5S1dka0dvZ2I5Und2Z1BnK1VjCisrejllaFlkV1NmUWFTei8vMXdCSjdhbVBFbnlNWndyVS93NGZHWGpqc1pEeWlyTnl6UWpESTcvMnVtbklnSzIKTVV6elI4R1JJdm1KMFo2MnFmMHNsYlpjQmdmc3UvTENxOEFhUDdIWUZWVGV5dXM0M1hpMkUxOE5lbGVFSE5aVwoyVnNjdmdsenlFbDVkV01pSHRxKy8yeTV3K3lERkxXUmF4NnN6T3hmczhqcGJqcUhBNThGL042cFNKeUtSYy8vCjhwblliaWE5VFJKTDhEQjJqRDJPelRTRnk1Z1RVVHN1bkhwdzVMRTAzWGpZT05ZMThxTU5ydjF6d1k3UUVzQ28KMWphZXA4Ujd3ODVVSGRUcDBFSFRPc1U3T0RsOHE3QXNnMGNsbERpVHE1OFJrVzBkNlFCWHpZQk13cUVaM00vdgo2enIrd01NVE85OFJNTGQ0Z3hkODE1cjdNUzI0SWtYZXdmQVFCOWw1ODFrd014Wkp4ZVRyTVI0czV3WUk5dDJjClUxdVVzNlM1bGJxZDhzRmJ1bnJsdFlYTAotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+            client-key-data: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlKS0FJQkFBS0NBZ0VBMGhxRHV0bzVnYXNTRzdRV3Q2ZjNsV3ZZS0FLOEtIYkoxdFBYcWZwMXFTNE94aUowClRuUXkwTTlyNjBlQlp1UFJaaUlGRGUyc2ZmL1ovSklxd1FFVzlEMHBLVmQ4dVpBcXpHZVhYOUlLOHpCbGpHemMKYWFlMCtDcWlXRUI0T2RCT1VaeGRFNFdRV2xEZlpxZSt2NG5aSWVmN09sRlZEdDVyd011VU9uTG56SjM1RmxWaQpxN2ZoRCtCYS96bDlmdTA1UDQxNlVaR3NablhzNFJMd3doR0gwNEpUclFMaVdLb3QxNEwxK0RFcjdOa2I5bFJLCm1QUFZMMVZXVU41cVZnOFo0aURQZjlvdjVwMnJMaGUvUFd3cTlnbkw2OVY4RGdoSDVGWEdwMmlLQXhDVTNLa1gKOFMrMkFWcitUWmpQbXEzRUxYT3ZvWlhDSGI2LytCUDlkWnd5SXYyVU0yV2NFeVlSY0cxeEpQbzZMdkpuSTBOVQpIaFIzZFR6dUN3QWk1WnJteWJqK1l5RjcwZlBMR0JDZEM0azNIR2Jsc3I2SFUvOGZFTjl1SngzOHJpK3dFL1QyCjFPazcvakJvUmZadldqZGJPVzBwcFJnd05Mc29Xb2UyOWxZbyt1elBqa1YxUUpuU3gxWnZqQkdzWWNvOEM2a0UKdGxEMFZRbFdsYkQxUnM5aURKOEduNUJ6aTdvTmFjTnB1Z3ROL25tRVhveHBzL2FnSEZUY1JDRWxZcDdTdlRiNAphT3RieDI1TENxeTkrR2VYNlFJeGFnQUwzNHZ1aG9CTDRLK01DK1hPWDFaNi9velJTL1ZNeCsyWmVpOWhtZ1NxCjdZZEpIRk9ZWnl5U21DaGFaY3JVT1EzOVIxNHpyMFl1N1VzQ2VPQVBMblhyK2xKMHFNVVdJdDdac1NVQ0F3RUEKQVFLQ0FnQkZURm1HbDlPLzRSem41azVYNVI3VU9lM2h4SVVyRTRNZlNHQXB3R0p1bXJKa3g1aDFCLzU2d085bgpldjVEWVlEL250anI3eWlscG0zUDBLWXBZcUtmakV5M1JoUHRZSSs5TzYzQi9SVi9nTWI5dWlvNDd3ZlJrcjVaClBXcHFKenF0MEZVaXl6c0Jqd3NnWU5PWmVXNFVzTjg4TFBkUklDdUtPNXQ0YTgzb3YzSVkyN0RmMHBaNUZoYnQKZDVqYzlJR2RaSnlqcXRpaU11TWVtWkN2Y2ZqSzJvR2Uzd1NwR2Zoa3pOMDBMNE85YXg2OThLOXFJNEo5U2poZQpFLzRleEh4VkNWMW5YaC9PZ05LbE1VL3lnbXJwRy9JV3B5Tnp2V2Q0K0pHOVJjMi9sUWlFZjRGV0c5WjhPL2NFCndSSTRnbmZpUmZYMzVkMVEwa21mR1hqUUFlVEc3SkpuT2dGdVQvTlJ4TExCY3dZaDZjRXJpMUxsZUFYdVVQUE8KakhvN0dlMXVsWE9ROUg1MVZ4MjlXc3EwZHBNNlgrS1BsVzlSdTh3bjQ4ZTJQaHlpeFlQZHpEaTZveGJGYTZpUApuVDJXaGpoLzdsa3J3SGZVTldIRzd5MlRJQXo2MFN1OGVoK1lmSDY5U3o4QmlDazNMcnhtaHg0eSt2QWVsNTljClN3RVJSK2lnTlRhTlBtYUxiNmpCQk5oMm96dUt6WWVkUGxkMTVLZVgvU0Q2SzM4MFpqTEtGNjVJZEdpTXdHVFUKbWlUcndSalNzZ2tkQXNlSTE1RHpWUUtUQlFCQ2JHbW81NC9Nc0UyNE1Mc3B1QnhuSnN3dVFGRGtOL0hvMnBCUAordGVlZy9SbmlJNFVPM3NqTHNicXFXLzFtbXdHUzhHd3dPci9xdWRBSm1CMTJYc25RUUtDQVFFQTNSUUpZb2pSCjREclZKcE5iOTAraTYrQ2ZsKzd5UDZCZXNieDZTZWNoRTFFTHZMaTB0UXg5MUpuSTVxMmRsclQwNHdmZWNJV3UKQk85dWt4MTMzM3Jabmh2QkE1b2psdklSK00xWFpRaWE0emgrV25BYkx1YytwbjAzZ0JLdUdpSDFzQlJnSWVhcgp3WVNCTzZ0RlRjcGtLdkhBRGZpbG5DNmpHcUF0N0d2MG5WZ3BHM2w4SUZsODhxbFpRdDZET25YSSt3OFlkSStECmU2WDk0YUJ3OHhnWmNjSTlRbjJ3ZjNVbjA1VWdka3YwakxSMEhmaEt2RXA2YVNSSlo4cTcyaDgvL3N3SWdVSlYKeEpySmIycmJjM0sraUtkYy8wd1pldFhjL0xyNFR4K3dPSHYxMmNnRXBEOXVOZlppSXkxUVZycHFITk9FOHl2RQo3bjVJaXh4Z05iNkFWd0tDQVFFQTgwcXU0dkx4ZTBGRXhsYkx5UWc5QW9KNDZQOW45YTBpeDIwU0lURGdobGpRCnRmSTY3ZHp0S2NSOVRGT3RtYnlCZkZMQUg4aTNkOWVxMDJ6OVBxbWMxVmFDNGUrbnRQNzVRMkNnRFB0REt3Y3UKbEp0S1VYWXhuUWVtdHEwcEw3V1owWmVWaDlmaUEyeDU2QWNEeW1NNjdDNHdSd3dpbVhMM0FSNENkU3Z5WmFiaApFM3V0STFCVEhHd0QxYk9nK3hNcDArT2VVeHRTMHU0SUNOTHpiMUNPUm85MFJhdkw2REdsd0daMXNGMFo5RG5SCm5OWFhUckVtblhhTGVVTjIrM2szQU5ONDdTN3g3SGk3QWxaVisrRUNlM3dHcmRZbklUaXZqd2prQnR0a3JHQksKZFc4bis2ZmlJcC9wMXhXMTJBYythL2t4Vi9uKzcrbTlHclBpTUFLODR3S0NBUUVBaDBtZ3FKekRtbTFHVFBIMgpZSFJxWmVBeXFiNCtubk1jSDdZUU83Tm1DVFVhY3FXeForMjUvdVVSRFNFSGc5YysyTVBTK3BiRHRCOTFVaS9CClVKQVVKZTRrQW5sTCtDNHdrMG5OaG5WcW0wdlIvclFGM29FQ1ZNM2hyYzFBbjV0U2h5c2czUDRVOHpxTC95REQKSzJTRVFjZG8yT1BsTEp0WmtveWRMY1d1anE4SmtOZVovdzNrS1hjNnVYSURhajN6L0xiekp6ay9vK1lqWS9SVAp5bDlnQ3I1cjBJbXIvWU9MR0s1MGpBL1ZHbG0vaVN1TlNJWm5QSHBKTld2WjR4UW1qRno5ZzJROXFpOXl2MnpyCjJFMUtqY09sWkZHRWNpZjNzTzBWMFEyNlFBYVRuMjhJY0I2azZmN1pkVjlnZjRKYU4wTzFZejNRcUlXOURPd1QKY0RBZ3h3S0NBUUEwdTZKT2hMUDhzRGYwK1lrd0tMMzRsa2tZejRzNy8rd0M1OHcvTDNYckNNTXNQTFd6S3VpbwozZkwrb1VDR2l3cFI1U25KZWRyeWVlZUg3aDZ4LzFlRUVqMUtOWVRYUVZETDN0eXlFNkFLYW9NWktOT2g5b2xvCmJPa2d2VVdwRnFhaGZFYW43QTRNQ2U0ZWNhN0xwbGgyS3NqQ0RZcE9VbEhoaHh5blF3QkdNamFrMzNDMnI4bGoKNXJHcUYwWTBSWUlTY0VxMzNydEVCdDNzODdSYUUwN1RVbkswU3psbU9hU2dvRlN3Qm00Q3RxbU5ZZmhLRVRHNgpmYUJiaDFqNXh0czZMWndQWk5hQkYrWUk2cWUyY1ozMUgvdmVvQVZaT1Ewc1pwUHVQSTJFbzFaZ1A5aWR2bFRRCmhuTEw4T082VUUraVhaL3BYc0Y0Uk9SOUxqSS9qOGhiQW9JQkFEZTdBUi9oVFF5b00vdTI2QzRDYVFwMmhqZ2wKSDFjL3VwMDlHZUh3ZDZCSE92M2R4Wlc3MEs0c1dPdDd4Wk5FUkFtWmJSaEFzZTBVY3BMVGxwY2dVSHQrMm9DOApRMTFmNWI2Slh5cmZIa1pGNUtIcnJ1K0pjV1h0N1NlNzFOaEF1ZFZkTmVFTWk5bCtrOTZLRDdqTGJpTzhHZ2xOCklQQWdES00wMDZPQWVZQWxLRTJHRzJxbVZXd201MW1tN09ueU91QmdLTXZEeGZrV200UmNSSVh2Qnc2aFZJSEUKdWsrYS9LZEkyZTd4d2NnL2d4V1pJdThQcjhKa20zUTNnbjNYSHJLMlBjV05TTE9DMXBXZGQrRVBjUE5PdlB3ZApBMDNONUVnSmp1TEtaVEt4SVQyelprQThyN2V6bnhzbU52bGFHVlhNNGhZYnBUL2dIV1hreTk4WVNabz0KLS0tLS1FTkQgUlNBIFBSSVZBVEUgS0VZLS0tLS0K
+            token: b512a4fc5b186edeadd13ced6ff9f3a7b5174d3fa3297ed5cb73db2584cc6fc49597c2b6b620c9d0f6fe1cc4da7beb9a6459b12749552a46e412df2ee8ce7b94
+
+      kubeconfig-spinnaker-demo-account: |
+        apiVersion: v1
+        clusters:
+        - cluster:
+            certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUM1ekNDQWMrZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFWTVJNd0VRWURWUVFERXdwcmRXSmwKY201bGRHVnpNQjRYRFRJeU1EVXdPVEF5TXpnME4xb1hEVE15TURVd05qQXlNemcwTjFvd0ZURVRNQkVHQTFVRQpBeE1LYTNWaVpYSnVaWFJsY3pDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBTG02Cit5VzMvNWFVdEhvRDlNMGRWMkdiN1lGNnZLbDJpRFdZbmdTMGdGS0pLdmhYcTl5VlYrYUY2UTUwejJiMXdCM3kKQ1BqNDA3RG5jL2c0aFRJMDFEeGNYRjNRUC8zNFA2cFliM2RuYm9yTHpvMlBBK3VPOWhqb3Nod25vNmIvVnhLVApVZTRyM3R3b3BmNEJyUUJGYXBjeFNRUGhQaC9YWUNGUWtOa0lGZFFjSzVSM1dTZXpEbFlmK3lPUUpSdDhmbVlwCmNBeWFNTWdOeWhvTUdVZ2NsTUx6aWVIWUswa04rQ2ZKcnZXd1hxYS9YNHpSTXFUNHFNbWxKRU1maWN4SW5IQ1cKVHIrTFlVNHk1YXlJQ0RneEVrRlduNmozSDRGN2JqM0orTHg5M3JzcGdhcWgxcUgxTnkvV0dkbFNIeDBrcEI1QwpaSllKN2h0WS9SNURWdmNoWThNQ0F3RUFBYU5DTUVBd0RnWURWUjBQQVFIL0JBUURBZ0trTUE4R0ExVWRFd0VCCi93UUZNQU1CQWY4d0hRWURWUjBPQkJZRUZERWFrcWtKQzlRQllXbDNGMnBBWWtoV2JXTmxNQTBHQ1NxR1NJYjMKRFFFQkN3VUFBNElCQVFDMDYxdlNTYTBYdEo3WS94UGM3UXJWYktVZlhlS0hJZ0xsb2QxR0FLTDM4L05taGFHdAo1MHlNdk9Id0J5ODlYNUZTS3o3NkV4aWQyYjI1MmFNTkttSFBqbENXRzJaSGdaOURHRUlwZzY5b2dCRUZOSVNYCjRaaEFmZzdES1ZqaUtOWmJ0Wks0dFB4QnZFc01MaGM2Q1Z4eUxaZzVEbFJlSjFheUlrREdNQi9qYytwSTNFTWsKWkxPeHB2alZJVGFxRGRHR1o1V2JydzhqaG10Z1k3N1Z6aEYyL29mb1JqQ29pYzdYSytma2YxMDZidlFLTmpwYgpHbC9rNFliNktpZlVPbWIrVWRMMXR5NGhNK0FpY3h0VmlCS1V0WFNVYlVSQnVxdThWMjByVXdrWmtvd2E1emV5CjNoMVpXUFVDT2puN3NiTHd6VjNrSlV2Y21WYlV5WmRTbXMxeQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+            server: https://D79AE7F640DBD97C1BA795FD3BC284DE.gr7.cn-north-1.eks.amazonaws.com.cn
+          name: spinnaker-cluster
+        contexts:
+        - context:
+            cluster: spinnaker-cluster
+            user: spinnaker-cluster-token-user
+          name: spinnaker-cluster
+        current-context: spinnaker-cluster
+        kind: Config
+        preferences: {}
+        users:
+        - name: spinnaker-cluster-token-user
+          user:
+            token: eyJhbGciOiJSUzI1NiIsImtpZCI6ImF5YlpxWDFEWTlGc2pKbHVWdS1KOFJDV21rZmktYk0yM3V1TDlVTVVrZ1kifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJzcGlubmFrZXIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlY3JldC5uYW1lIjoic3Bpbm5ha2VyLXNlcnZpY2UtYWNjb3VudC10b2tlbi1rcWRwciIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJzcGlubmFrZXItc2VydmljZS1hY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiZmIyZDM2ZTQtMzg0ZC00MjExLTkwNWItMDMxYzYxZjkyZGM3Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OnNwaW5uYWtlcjpzcGlubmFrZXItc2VydmljZS1hY2NvdW50In0.mWchUrDx0N6b5GVEP_VdbfvkBQTY9Tlpbp5T6bRminZ9a1RPa-ykrzfmJWK6rhQs6KkBGat7U7qE2-u3ImkdtqXHyYdPDlugSzj50lL5NMOAMvAZv1YsMR8qaBB9-jL_pQsg4OHduDEXOL2b9W3p9dagDc-BduZJDmhl8AAj5gwn26Qb8mzmRa9kSUYOS6K4AygsqOIcxb2mG-2VAJlY9MCINwUaz3YmKJ191XxVOAOUy019zqCOgHJjIamzbt0mykrmv8zAvWptiZT4AOocT15MoR3DRTAGj8WfEdmBOJzrlImIvXu2RgZaYSWc0otD-wKkIyOjPHYAjp573g4yYQ
+
+  kustomize:
+    gate:
+      deployment:
+        patchesStrategicMerge:
+          - |
+            spec:
+              template:
+                spec:
+                  containers:
+                  - name: gate
+                    image: njiang/spinnaker-community-gate:1.13.0-20191029172246
+    clouddriver:
+      deployment:
+        patchesStrategicMerge:
+          - |
+            spec:
+              template:
+                spec:
+                  containers:
+                  - name: clouddriver
+                    image: njiang/spinnaker-community-clouddriver:6.4.1-20191111102213
+    deck:
+      deployment:
+        patchesStrategicMerge:
+          - |
+            spec:
+              template:
+                spec:
+                  containers:
+                  - name: deck
+                    image: njiang/spinnaker-community-deck:2.13.1-20191111102213
+
+    echo:
+      deployment:
+        patchesStrategicMerge:
+          - |
+            spec:
+              template:
+                spec:
+                  containers:
+                  - name: echo
+                    image: njiang/spinnaker-community-echo:2.9.0-20191029172246
+    front50:
+      deployment:
+        patchesStrategicMerge:
+          - |
+            spec:
+              template:
+                spec:
+                  containers:
+                  - name: front50
+                    image: njiang/spinnaker-community-front50:0.20.1-20191107034416
+    orca:
+      deployment:
+        patchesStrategicMerge:
+          - |
+            spec:
+              template:
+                spec:
+                  containers:
+                  - name: orca
+                    image: njiang/spinnaker-community-orca:2.11.1-20191111102213
+    redis:
+      deployment:
+        patchesStrategicMerge:
+          - |
+            spec:
+              template:
+                spec:
+                  containers:
+                  - name: redis
+                    image: njiang/spinnaker-community-redis-cluster:v2
+    rosco:
+      deployment:
+        patchesStrategicMerge:
+          - |
+            spec:
+              template:
+                spec:
+                  containers:
+                  - name: rosco
+                    image: njiang/spinnaker-community-rosco:0.15.0-20191029140133
+    kayenta:
+      deployment:
+        patchesStrategicMerge:
+          - |
+            spec:
+              template:
+                spec:
+                  containers:
+                  - name: kayenta
+                    image: njiang/kayenta:0.12.0-20191023142816
+  expose:
+    type: service  # Kubernetes LoadBalancer type (service/ingress), note: only "service" is supported for now
+    service:
+      type: LoadBalancer
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
+        service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: 'true'
+        service.beta.kubernetes.io/aws-load-balancer-type: nlb
+      overrides:
+        deck:
+          publicPort: 8081
+        gate:
+          publicPort: 8082

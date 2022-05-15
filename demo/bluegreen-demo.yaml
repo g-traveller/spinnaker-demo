@@ -1,0 +1,43 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+   name: spinnaker-bluegreen-demo
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: spinnaker-bluegreen-demo
+  name: nginx
+spec:
+  ports:
+    - port: 80
+  selector:
+    app: bluegreen
+
+---
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  annotations:
+    strategy.spinnaker.io/max-version-history: '2'
+  name: nginx
+  namespace: spinnaker-bluegreen-demo
+  labels:
+    app: nginx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.14.2
+        ports:
+        - containerPort: 80
