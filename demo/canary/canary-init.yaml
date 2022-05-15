@@ -4,11 +4,16 @@ kind: Service
 metadata:
   namespace: airline
   name: airline
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
+    service.beta.kubernetes.io/aws-load-balancer-type: nlb
+    
 spec:
   ports:
     - port: 8080
   selector:
     app: airline
+  type: LoadBalancer
 
 ---
 apiVersion: apps/v1
